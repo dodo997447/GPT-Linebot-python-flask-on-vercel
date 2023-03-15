@@ -1,0 +1,45 @@
+SELECT
+  a.accountid,
+  a.accountcode,
+  a.status,
+  a.datecreated,
+  up.accountcode as upline,
+  ad.firstname,
+  ad.mobileno,
+  ad.email,
+  ad.remark,
+  a.levelid,
+  sum.1st_deposit_date as ledgerdatetime,
+  cl.creditlimit as main_wallet,
+  ba.banklevel_id,
+  sum.d_amt,
+  sum.w_amt,
+  fz.fieldvalue as frozen,
+  lck.fieldvalue as locked,
+  totp.fieldvalue as totp,
+  totpkey.fieldvalue as totpkey,
+  sum.ppsum
+FROM
+  a_account a
+  left join a_account up on up.accountid = a.ag_accountid
+  left join a_account_data_extra fz on a.accountid = fz.accountid
+  AND fz.fieldname = 'frozen'
+  left join a_account_data_extra lck on a.accountid = lck.accountid
+  AND lck.fieldname = 'locked'
+  left join a_account_data_extra totp on a.accountid = totp.accountid
+  AND totp.fieldname = 'totp'
+  left join a_account_data_extra totpkey on a.accountid = totpkey.accountid
+  AND totpkey.fieldname = 'totpkey'
+  left join can_money_system.account_banklevel_setting ba ON a.accountid = ba.accountindex
+  left join a_creditlimit cl ON a.accountid = cl.accountid
+  and cl.gametypeid = '0'
+  left join a_account_sum sum on sum.accountid = a.accountid
+  left join a_account_data ad on a.accountid = ad.accountid
+WHERE
+  a.levelid = '4'
+  AND a.status = '1'
+  AND a.status <> '-1'
+ORDER BY
+  a.datecreated DESC
+LIMIT
+  752000, 500
